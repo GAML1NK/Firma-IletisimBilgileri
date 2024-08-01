@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> <!-- HTML DOSYASI "static" isimli klasörün içerisinde olmalaı-->
+    <meta charset="UTF-8">
+    <title>Firma Arama</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Firma İletişim Bilgisi Arama</h1>
+        <form id="searchForm">
+            <input type="text" id="firmaAdi" placeholder="Firma Adı Giriniz" required>
+            <button type="submit">Ara</button>
+        </form>
+        <div id="sonuc" class="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const firmaAdi = document.getElementById('firmaAdi').value;
+            
+            fetch('/ara', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ firmaAdi: firmaAdi }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                const sonucDiv = document.getElementById('sonuc');
+                if (data.error) {
+                    sonucDiv.innerHTML = `<p>Hata: ${data.error}</p>`;
+                } else {
+                    const phones = data.phones.length ? `<p>Telefon: ${data.phones.join(', ')}</p>` : `<p>Telefon bulunamadı.</p>`;
+                    const emails = data.emails.length ? `<p>Email: ${data.emails.join(', ')}</p>` : `<p>Email bulunamadı.</p>`;
+                    sonucDiv.innerHTML = `${phones}${emails}`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
