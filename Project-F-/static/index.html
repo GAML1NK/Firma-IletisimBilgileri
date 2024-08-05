@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> <!-- HTML DOSYASI "static" isimli klasörün içerisinde olmalaı-->
+<head>
     <meta charset="UTF-8">
     <title>Firma Arama</title>
     <style>
@@ -9,7 +9,7 @@
             margin: 20px;
         }
         .container {
-            max-width: 600px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 20px;
             border: 1px solid #ddd;
@@ -22,6 +22,9 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             background-color: #f9f9f9;
+        }
+        .result-item {
+            margin-bottom: 20px;
         }
     </style>
 </head>
@@ -39,7 +42,7 @@
         document.getElementById('searchForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const firmaAdi = document.getElementById('firmaAdi').value;
-            
+
             fetch('/ara', {
                 method: 'POST',
                 headers: {
@@ -52,10 +55,19 @@
                 const sonucDiv = document.getElementById('sonuc');
                 if (data.error) {
                     sonucDiv.innerHTML = `<p>Hata: ${data.error}</p>`;
+                } else if (data.length === 0) {
+                    sonucDiv.innerHTML = `<p>Sonuç bulunamadı.</p>`;
                 } else {
-                    const phones = data.phones.length ? `<p>Telefon: ${data.phones.join(', ')}</p>` : `<p>Telefon bulunamadı.</p>`;
-                    const emails = data.emails.length ? `<p>Email: ${data.emails.join(', ')}</p>` : `<p>Email bulunamadı.</p>`;
-                    sonucDiv.innerHTML = `${phones}${emails}`;
+                    let resultHTML = '';
+                    data.forEach(result => {
+                        resultHTML += `<div class="result-item">
+                            <p><strong>URL:</strong> <a href="${result.url}" target="_blank">${result.url}</a></p>
+                            <p><strong>Telefon:</strong> ${result.phones.join(' || ') || 'Bulunamadı'}</p>
+                            <p><strong>Email:</strong> ${result.emails.join(' || ') || 'Bulunamadı'}</p>
+                            <p><strong>Ülke:</strong> ${result.country || "Domain Bilgileri Gizlenmiş "}</p>
+                        </div>`;
+                    });
+                    sonucDiv.innerHTML = resultHTML;
                 }
             })
             .catch(error => {
